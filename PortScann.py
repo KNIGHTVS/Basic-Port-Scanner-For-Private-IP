@@ -65,7 +65,7 @@ def get_private_ip():
     except Exception:
         return "127.0.0.1"
 
-# 🏠 Homepage
+
 
 
 @app.route("/", methods=["GET", "POST"])
