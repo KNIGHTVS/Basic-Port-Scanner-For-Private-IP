@@ -30,6 +30,7 @@ port_info = {
 }
 
 
+
 def scan_ports(host, ports):
     open_ports = []
     for port in ports:
@@ -53,27 +54,32 @@ def scan_ports(host, ports):
     return open_ports
 
 
+
 def get_private_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80)) 
+        s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
         s.close()
         return ip
     except Exception:
         return "127.0.0.1"
 
+# 🏠 Homepage
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     open_ports = []
-    ip = get_private_ip()  
+    ip = get_private_ip()
 
     if request.method == "POST":
         ports = range(20, 1025)
         open_ports = scan_ports(ip, ports)
 
     return render_template("index.html", ip=ip, open_ports=open_ports)
+
+
 
 
 @app.route("/details/<int:port>", methods=["GET"])
