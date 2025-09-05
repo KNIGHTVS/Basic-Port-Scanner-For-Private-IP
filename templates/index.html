@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Private IP Port Scanner</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #00ff99;
+      font-family: "Courier New", monospace;
+      text-align: center;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-shadow: 0 0 10px #00ff99;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 70%;
+    }
+    th, td {
+      border: 1px solid #00ff99;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #001a13;
+    }
+    tr:hover {
+      background-color: #00261a;
+    }
+    button {
+      background: black;
+      border: 1px solid #00ff99;
+      color: #00ff99;
+      padding: 5px 10px;
+      cursor: pointer;
+      text-shadow: 0 0 5px #00ff99;
+    }
+    button:hover {
+      background-color: #00ff99;
+      color: black;
+    }
+    .card {
+      border: 1px solid #00ff99;
+      padding: 15px;
+      margin: 15px auto;
+      width: 70%;
+      background-color: #001a13;
+      box-shadow: 0 0 15px #00ff99;
+      text-align: left;
+    }
+    .accordion {
+      cursor: pointer;
+      padding: 10px;
+      width: 100%;
+      text-align: left;
+      outline: none;
+      border: none;
+      background-color: #001a13;
+      color: #00ff99;
+      font-size: 16px;
+      margin-top: 10px;
+      border-top: 1px solid #00ff99;
+    }
+    .accordion-content {
+      display: none;
+      padding: 10px;
+      border-top: 1px solid #00ff99;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Private IP Port Scanner</h1>
+  <h2>Your IP: {{ ip }}</h2>
+
+  <form method="POST">
+    <button type="submit">Scan My IP</button>
+  </form>
+
+  {% if open_ports %}
+    <h2>Open Ports:</h2>
+    <table>
+      <tr>
+        <th>Port</th>
+        <th>Service</th>
+        <th>Risk</th>
+        <th>Mitigation</th>
+        <th>Action</th>
+      </tr>
+      {% for port in open_ports %}
+      <tr>
+        <td>{{ port.port }}</td>
+        <td>{{ port.service }}</td>
+        <td>{{ port.risk }}</td>
+        <td>{{ port.mitigation }}</td>
+        <td><button onclick="fetchDetails({{ port.port }})">See More</button></td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No open ports detected on your private network ✅</p>
+  {% endif %}
+
+  <div id="details-box"></div>
+
+  <script>
+    function fetchDetails(port) {
+      fetch(`/details/${port}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const details = data.details;
+            const sections = details.split("###").filter(Boolean);
+
+            let html = "";
+            sections.forEach(sec => {
+              const lines = sec.trim().split("\n");
+              const title = lines.shift();
+              const content = lines.join("<br>");
+              if (title.includes("Steps")) {
+                html += `
+                  <div class="card">
+                    <button class="accordion">${title}</button>
+                    <div class="accordion-content">${content}</div>
+                  </div>`;
+              } else {
+                html += `<div class="card"><h3>${title}</h3><p>${content}</p></div>`;
+              }
+            });
+
+            document.getElementById("details-box").innerHTML = html;
+
+            // Accordion logic
+            document.querySelectorAll(".accordion").forEach(btn => {
+              btn.addEventListener("click", () => {
+                const content = btn.nextElementSibling;
+                content.style.display = content.style.display === "block" ? "none" : "block";
+              });
+            });
+          } else {
+            document.getElementById("details-box").innerHTML = `<p>${data.details}</p>`;
+          }
+        });
+    }
+  </script>
+</body>
+</html>
