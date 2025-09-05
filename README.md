@@ -91,7 +91,6 @@ Basic-Port-Scanner-For-Private-IP/
 │── .env.example          # Example for Gemini API key
 │── templates/
 │     └── index.html      # Frontend page
-│── static/               # (Optional) CSS/JS files
 ```
 
 ---
